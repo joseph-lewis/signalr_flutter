@@ -40,6 +40,10 @@ object SignalR {
             }
             hub = connection?.createHubProxy(hubName)
 
+            Handler(Looper.getMainLooper()).post {
+                SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", "JOETESTING")
+            }
+
             hubMethods.forEach { methodName ->
                 hub?.on(methodName, { res ->
                     Handler(Looper.getMainLooper()).post {
