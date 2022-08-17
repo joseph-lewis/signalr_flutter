@@ -2,6 +2,7 @@ package dev.asdevs.signalr_flutter
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import io.flutter.plugin.common.MethodChannel.Result
 import microsoft.aspnet.signalr.client.*
 import microsoft.aspnet.signalr.client.hubs.HubConnection
@@ -49,25 +50,25 @@ object SignalR {
 
             connection?.connected {
                 Handler(Looper.getMainLooper()).post {
-                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state.name)
+                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state?.name)
                 }
             }
 
             connection?.reconnected {
                 Handler(Looper.getMainLooper()).post {
-                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state.name)
+                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state?.name)
                 }
             }
 
             connection?.reconnecting {
                 Handler(Looper.getMainLooper()).post {
-                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state.name)
+                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state?.name)
                 }
             }
 
             connection?.closed {
                 Handler(Looper.getMainLooper()).post {
-                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state.name)
+                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state?.name)
                 }
             }
 
