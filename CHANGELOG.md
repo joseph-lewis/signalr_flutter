@@ -56,3 +56,7 @@
 ## 0.1.2
 
 * IsConnected Method Added
+
+## 0.1.3
+
+* Fixed SignalR Cancelling
