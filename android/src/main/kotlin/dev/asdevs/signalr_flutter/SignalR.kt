@@ -114,6 +114,13 @@ object SignalR {
             Log.d("TAG", "your log message - SIGNALR CONNECTION STOPPED")
             Log.d("TAG", "your log message - SIGNALR CONNECTION STOPPED")
 
+            Handler(Looper.getMainLooper()).post {
+                SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", "Stopping")
+            }
+//            Handler(Looper.getMainLooper()).post {
+//                SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", handler.localizedMessage)
+//            }
+
         } catch (ex: Exception) {
             result.error(ex.localizedMessage, ex.stackTrace.toString(), null)
         }
