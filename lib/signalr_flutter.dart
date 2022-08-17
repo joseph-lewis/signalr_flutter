@@ -44,8 +44,7 @@ class SignalR {
   /// [queryString] is a optional field to send query to server.
   Future<bool?> connect() async {
     try {
-      final result = await _channel
-          .invokeMethod<bool>("connectToServer", <String, dynamic>{
+      final result = await _channel.invokeMethod<bool>("connectToServer", <String, dynamic>{
         'baseUrl': baseUrl,
         'hubName': hubName,
         'queryString': queryString ?? "",
@@ -121,14 +120,10 @@ class SignalR {
   }
 
   /// Invoke any server method with optional [arguments].
-  Future<T?> invokeMethod<T>(String methodName,
-      {List<dynamic>? arguments}) async {
+  Future<T?> invokeMethod<T>(String methodName, {List<dynamic>? arguments}) async {
     try {
       final result = await _channel.invokeMethod<T>(
-          "invokeServerMethod", <String, dynamic>{
-        'methodName': methodName,
-        'arguments': arguments ?? List.empty()
-      });
+          "invokeServerMethod", <String, dynamic>{'methodName': methodName, 'arguments': arguments ?? List.empty()});
       return result;
     } on PlatformException catch (ex) {
       print("Platform Error: ${ex.message}");
