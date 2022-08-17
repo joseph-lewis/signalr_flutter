@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 
+//Joe's CHANGES
 /// Transport method of the signalr connection.
 enum Transport { Auto, ServerSentEvents, LongPolling }
 
