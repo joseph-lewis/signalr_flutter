@@ -19,8 +19,8 @@ enum class CallMethod(val value: String) {
 }
 
 object SignalR {
-    private lateinit var connection: HubConnection
-    private lateinit var hub: HubProxy
+    private var connection: HubConnection? = null
+    private var hub: HubProxy? = null
 
     fun connectToServer(url: String, hubName: String, queryString: String, headers: Map<String, String>, transport: Int, hubMethods: List<String>, result: Result) {
         try {
@@ -35,59 +35,59 @@ object SignalR {
                 val cred = Credentials() { request ->
                     request.headers = headers
                 }
-                connection.credentials = cred
+                connection?.credentials = cred
             }
-            hub = connection.createHubProxy(hubName)
+            hub = connection?.createHubProxy(hubName)
 
             hubMethods.forEach { methodName ->
-                hub.on(methodName, { res ->
+                hub?.on(methodName, { res ->
                     Handler(Looper.getMainLooper()).post {
                         SignalRFlutterPlugin.channel.invokeMethod("NewMessage", listOf(methodName, res))
                     }
                 }, Any::class.java)
             }
 
-            connection.connected {
+            connection?.connected {
                 Handler(Looper.getMainLooper()).post {
-                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection.state.name)
+                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state.name)
                 }
             }
 
-            connection.reconnected {
+            connection?.reconnected {
                 Handler(Looper.getMainLooper()).post {
-                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection.state.name)
+                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state.name)
                 }
             }
 
-            connection.reconnecting {
+            connection?.reconnecting {
                 Handler(Looper.getMainLooper()).post {
-                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection.state.name)
+                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state.name)
                 }
             }
 
-            connection.closed {
+            connection?.closed {
                 Handler(Looper.getMainLooper()).post {
-                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection.state.name)
+                    SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", connection?.state.name)
                 }
             }
 
-            connection.connectionSlow {
+            connection?.connectionSlow {
                 Handler(Looper.getMainLooper()).post {
                     SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", "Slow")
                 }
             }
 
-            connection.error { handler ->
+            connection?.error { handler ->
                 Handler(Looper.getMainLooper()).post {
                     SignalRFlutterPlugin.channel.invokeMethod("ConnectionStatus", handler.localizedMessage)
                 }
             }
 
             when (transport) {
-                1 -> connection.start(ServerSentEventsTransport(connection.logger))
-                2 -> connection.start(LongPollingTransport(connection.logger))
+                1 -> connection?.start(ServerSentEventsTransport(connection?.logger))
+                2 -> connection?.start(LongPollingTransport(connection?.logger))
                 else -> {
-                    connection.start()
+                    connection?.start()
                 }
             }
 
@@ -99,7 +99,7 @@ object SignalR {
 
     fun reconnect(result: Result) {
         try {
-            connection.start()
+            connection?.start()
         } catch (ex: Exception) {
             result.error(ex.localizedMessage, ex.stackTrace.toString(), null)
         }
@@ -107,7 +107,9 @@ object SignalR {
 
     fun stop(result: Result) {
         try {
-            connection.stop()
+            connection?.stop()
+            connection = null
+            hub = null
         } catch (ex: Exception) {
             result.error(ex.localizedMessage, ex.stackTrace.toString(), null)
         }
@@ -115,8 +117,8 @@ object SignalR {
 
     fun isConnected(result: Result) {
         try {
-            if (this::connection.isInitialized) {
-                when (connection.state) {
+            if (connection != null) {
+                when (connection?.state) {
                     ConnectionState.Connected -> result.success(true)
                     else -> result.success(false)
                 }
@@ -130,7 +132,7 @@ object SignalR {
 
     fun listenToHubMethod(methodName: String, result: Result) {
         try {
-            hub.on(methodName, { res ->
+            hub?.on(methodName, { res ->
                 Handler(Looper.getMainLooper()).post {
                     SignalRFlutterPlugin.channel.invokeMethod("NewMessage", listOf(methodName, res))
                 }
@@ -142,15 +144,15 @@ object SignalR {
 
     fun invokeServerMethod(methodName: String, args: List<Any>, result: Result) {
         try {
-            val res: SignalRFuture<Any> = hub.invoke(Any::class.java, methodName, *args.toTypedArray())
+            val res: SignalRFuture<Any>? = hub?.invoke(Any::class.java, methodName, *args.toTypedArray())
 
-            res.done { msg: Any? ->
+            res?.done { msg: Any? ->
                 Handler(Looper.getMainLooper()).post {
                     result.success(msg)
                 }
             }
 
-            res.onError { throwable ->
+            res?.onError { throwable ->
                 Handler(Looper.getMainLooper()).post {
                     result.error("Error", throwable.localizedMessage, null)
                 }
