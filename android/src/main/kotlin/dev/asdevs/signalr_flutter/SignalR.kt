@@ -110,6 +110,9 @@ object SignalR {
             connection?.stop()
             connection = null
             hub = null
+            print("SIGNALR CONNECTION STOPPED")
+            println("SIGNALR CONNECTION STOPPED")
+
         } catch (ex: Exception) {
             result.error(ex.localizedMessage, ex.stackTrace.toString(), null)
         }
